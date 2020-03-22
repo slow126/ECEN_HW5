@@ -13,6 +13,7 @@ SHOW_FRAME = False
 STEP = 60
 WINDOW = 15
 PT_THRESHOLD = 0.9
+SCALE = 4
 
 lk_params = dict(winSize=(21, 21),
                   maxLevel=0,
@@ -31,7 +32,7 @@ def find_template(next_frame, prev_frame, corners):
             match = cv2.matchTemplate(next_frame, template, cv2.TM_CCOEFF_NORMED)
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(match)
             if max_val > PT_THRESHOLD:
-                max_loc = tuple(map(sum, zip(max_loc, (20, 20))))
+                max_loc = tuple(map(sum, zip(max_loc, (WINDOW, WINDOW))))
                 nextPts += [max_loc]
                 good_corners += [corner]
     return good_corners, nextPts
@@ -41,7 +42,7 @@ for j in range(len(FILE_LIST) - STEP):
     file = FILE_LIST[j]
     m = STEP
     frame = cv2.imread(os.path.join(PATH, file))
-    frame = cv2.resize(frame, (int(frame.shape[1]/2), int(frame.shape[0]/2)))
+    frame = cv2.resize(frame, (int(frame.shape[1]/SCALE), int(frame.shape[0]/SCALE)))
     gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
     corners = cv2.goodFeaturesToTrack(gray, 100, .1, 1)
     if SHOW_FRAME:
@@ -52,7 +53,7 @@ for j in range(len(FILE_LIST) - STEP):
 
     next_file = FILE_LIST[j + m]
     next_frame = cv2.imread(os.path.join(PATH, next_file))
-    next_frame = cv2.resize(next_frame, (int(next_frame.shape[1] / 2), int(next_frame.shape[0] / 2)))
+    next_frame = cv2.resize(next_frame, (int(next_frame.shape[1] / SCALE), int(next_frame.shape[0] / SCALE)))
     next_gray = cv2.cvtColor(next_frame, cv2.COLOR_RGB2GRAY)
 
     prev_corners, next_corners = find_template(next_gray, gray, corners)
@@ -61,6 +62,6 @@ for j in range(len(FILE_LIST) - STEP):
     for i in range(len(prev_corners)):
         cv2.line(frame, tuple(np.squeeze(prev_corners[i])), tuple(np.squeeze(next_corners[i])), (255, 0, 255), thickness=1)
     cv2.imwrite("template/frame-step-" + str(STEP).zfill(3) + "-" + str(j).zfill(5) + ".jpg", frame)
-    # cv2.imshow("frame", frame)
-    # cv2.waitKey(1)
+    cv2.imshow("frame", frame)
+    cv2.waitKey(1)
     x = 1

@@ -32,6 +32,7 @@ if SAVE_FRAMES:
 SHOW_FRAME = False
 STEP = 30
 PT_THRESHOLD = 30
+SCALE = 4
 
 lk_params = dict(winSize=(21, 21),
                   maxLevel=0,
@@ -44,7 +45,7 @@ for j in range(len(FILE_LIST) - STEP):
     file = FILE_LIST[j]
     m = STEP
     frame = cv2.imread(os.path.join(PATH, file))
-    frame = cv2.resize(frame, (int(frame.shape[1]/2), int(frame.shape[0]/2)))
+    frame = cv2.resize(frame, (int(frame.shape[1]/SCALE), int(frame.shape[0]/SCALE)))
     gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
     corners = cv2.goodFeaturesToTrack(gray, 1000, .1, 1)
     if SHOW_FRAME:
@@ -55,7 +56,7 @@ for j in range(len(FILE_LIST) - STEP):
 
     next_file = FILE_LIST[j + m]
     next_frame = cv2.imread(os.path.join(PATH, next_file))
-    next_frame = cv2.resize(next_frame, (int(next_frame.shape[1] / 2), int(next_frame.shape[0] / 2)))
+    next_frame = cv2.resize(next_frame, (int(next_frame.shape[1] / SCALE), int(next_frame.shape[0] / SCALE)))
     next_gray = cv2.cvtColor(next_frame, cv2.COLOR_RGB2GRAY)
 
     next_corners, status, err = cv2.calcOpticalFlowPyrLK(gray, next_gray, corners, None, **lk_params)
