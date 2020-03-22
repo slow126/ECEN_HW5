@@ -31,6 +31,7 @@ if SAVE_FRAMES:
 
 SHOW_FRAME = False
 STEP = 30
+PT_THRESHOLD = 30
 
 lk_params = dict(winSize=(21, 21),
                   maxLevel=0,
@@ -58,12 +59,12 @@ for j in range(len(FILE_LIST) - STEP):
     next_gray = cv2.cvtColor(next_frame, cv2.COLOR_RGB2GRAY)
 
     next_corners, status, err = cv2.calcOpticalFlowPyrLK(gray, next_gray, corners, None, **lk_params)
-    goodPts = cv2.threshold(err, 30, 1, cv2.THRESH_BINARY_INV)
+    goodPts = cv2.threshold(err, PT_THRESHOLD, 1, cv2.THRESH_BINARY_INV)
     print(np.sum(goodPts[1]))
     for i in range(len(corners)):
         if(goodPts[1][i] != 0):
             cv2.line(frame, tuple(np.squeeze(corners[i])), tuple(np.squeeze(next_corners[i])), (255, 0, 255), thickness=1)
     cv2.imshow("frame", frame)
-    # cv2.imwrite('LK/frame-step-' + str(STEP).zfill(3) + '-' + str(i).zfill(5)+'.jpg', frame)
-    cv2.waitKey(1)
+    cv2.imwrite('LK/frame-step-' + str(STEP).zfill(3) + '-' + str(i).zfill(5)+'.jpg', frame)
+    # cv2.waitKey(1)
     x = 1
