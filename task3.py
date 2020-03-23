@@ -23,6 +23,7 @@ lk_params = dict(winSize=(21, 21),
                   criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
 
 
+
 def find_template(next_frame, prev_frame, corners):
     nextPts = []
     good_corners = []
@@ -32,14 +33,14 @@ def find_template(next_frame, prev_frame, corners):
         template = prev_frame[int(corner[1] - WINDOW):int(corner[1] + WINDOW), int(corner[0] - WINDOW):int(corner[0] + WINDOW)]
         # cv2.imshow("template", template)
         # cv2.waitKey()
-        match = cv2.matchTemplate(next_frame, (template), cv2.TM_CCOEFF_NORMED)
+        match = cv2.matchTemplate(next_frame[int(corner[1] - 2*WINDOW):int(corner[1] + 2*WINDOW), int(corner[0] - 2*WINDOW):int(corner[0] + 2*WINDOW)], (template), cv2.TM_CCOEFF_NORMED)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(match)
         # max_loc = tuple(map(sum, zip(max_loc, (WINDOW, WINDOW))))
         # found = next_frame[max_loc[1] - WINDOW:max_loc[1] + WINDOW, max_loc[0] - WINDOW :max_loc[0] + WINDOW]
         # cv2.imshow("found", found)
         # cv2.waitKey()
         # if max_val > PT_THRESHOLD:
-        max_loc = tuple(map(sum, zip(max_loc, (WINDOW, WINDOW))))
+        max_loc = tuple(map(sum, zip(max_loc, (WINDOW + corner[0] - 2*WINDOW, WINDOW + corner[1] - 2*WINDOW))))
         nextPts += [max_loc]
         good_corners += [corner]
     return good_corners, nextPts
@@ -98,6 +99,6 @@ for j in range(len(FILE_LIST) - STEP):
         if(tuple(corners[i]) != (0,0) and tuple(prev_corners[i]) != (0,0)):
             cv2.line(frame, tuple(np.squeeze(corners[i]).astype(int)), tuple(np.squeeze(prev_corners[i]).astype(int)), (255, 0, 255), thickness=1)
     cv2.imwrite("inter_frame/frame-step-" + str(STEP).zfill(3) + "-" + str(j).zfill(5) + ".jpg", frame)
-    # cv2.imshow("frame", frame)
-    # cv2.waitKey(1)
+    cv2.imshow("frame", frame)
+    cv2.waitKey(1)
     x = 1
